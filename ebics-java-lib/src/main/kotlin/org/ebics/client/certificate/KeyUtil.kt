@@ -26,10 +26,15 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
+import java.math.BigInteger
 import java.security.*
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.InvalidKeySpecException
+import java.security.spec.RSAPrivateKeySpec
+import java.security.spec.RSAPublicKeySpec
 import java.security.spec.X509EncodedKeySpec
+import javax.xml.parsers.DocumentBuilderFactory
+
 
 /**
  * Some key utilities
@@ -51,6 +56,49 @@ object KeyUtil {
         return keyGen.generateKeyPair()
     }
 
+
+
+
+    /**
+     * Creates a `KeyPair` in RSA format.
+     *
+     * @param xml
+     * @return KeyPair the key pair
+     * @throws NoSuchAlgorithmException
+     */
+    @Throws(NoSuchAlgorithmException::class)
+    fun buildKeyPairFromXml(xml: String): KeyPair {
+        val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        val doc = builder.parse(xml)
+        doc.documentElement.normalize()
+        val modulus = doc.getElementsByTagName("Modulus").item(0).textContent
+        val publicExponent = doc.getElementsByTagName("Exponent").item(0).textContent
+        val privateExponent = doc.getElementsByTagName("D").item(0).textContent
+        return buildKeyPair(modulus, publicExponent, privateExponent)
+    }
+
+    /**
+     * Creates a `KeyPair` in RSA format.
+     *
+     * @param modulus - base64 encoded modulus
+     * @param publicExponent - base64 encoded public exponent
+     * @param privateExponent - base64 encoded private exponent
+     * @return KeyPair the key pair
+     * @throws NoSuchAlgorithmException
+     */
+    @Throws(NoSuchAlgorithmException::class)
+    fun buildKeyPair(modulus:String, publicExponent: String, privateExponent: String): KeyPair {
+
+        val mB = BigInteger(1, java.util.Base64.getDecoder().decode(modulus))
+        val privateB = BigInteger(1, java.util.Base64.getDecoder().decode(privateExponent))
+        val publicB = BigInteger(1, java.util.Base64.getDecoder().decode(publicExponent))
+
+        val kf = KeyFactory.getInstance("RSA")
+        val privateKey = RSAPrivateKeySpec(mB, privateB)
+        val publicKey = RSAPublicKeySpec(mB, publicB)
+
+        return KeyPair(kf.generatePublic(publicKey),kf.generatePrivate(privateKey))
+    }
     /**
      * Generates a random password
      *
