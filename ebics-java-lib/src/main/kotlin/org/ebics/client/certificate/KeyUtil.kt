@@ -22,10 +22,8 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.commons.codec.binary.Hex
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.ebics.client.exception.EbicsException
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.UnsupportedEncodingException
+import org.xml.sax.InputSource
+import java.io.*
 import java.math.BigInteger
 import java.security.*
 import java.security.interfaces.RSAPublicKey
@@ -69,7 +67,7 @@ object KeyUtil {
     @Throws(NoSuchAlgorithmException::class)
     fun buildKeyPairFromXml(xml: String): KeyPair {
         val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val doc = builder.parse(xml)
+        val doc = builder.parse(InputSource(StringReader(xml)))
         doc.documentElement.normalize()
         val modulus = doc.getElementsByTagName("Modulus").item(0).textContent
         val publicExponent = doc.getElementsByTagName("Exponent").item(0).textContent
