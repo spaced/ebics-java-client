@@ -1,6 +1,6 @@
 import { computed, Ref, ref } from 'vue';
 import {
-  BankConnection,
+  BankConnection, UserCertificatesForImport,
 } from 'components/models/ebics-bank-connection';
 import {
   AdminOrderType,
@@ -8,7 +8,7 @@ import {
 import { UserIniWizzStep } from 'components/models/user-init-wizz';
 import {
   UserPassword, UserLettersResponse,
-  CertRequest
+  CertRequest, CertImportRequest
 } from 'components/models/ebics-request-response';
 import { api } from 'boot/axios';
 import usePasswordAPI from 'components/password-api';
@@ -16,7 +16,8 @@ import usePasswordAPI from 'components/password-api';
 
 
 export default function useBankConnectionInitializationAPI(
-  user: Ref<BankConnection>
+  user: Ref<BankConnection>,
+  userCertificatesForImport: Ref<UserCertificatesForImport>
 ) {
   const { pwdApiErrorHandler, pwdApiOkHandler, promptCertPassword } = usePasswordAPI();
 
@@ -77,11 +78,23 @@ export default function useBankConnectionInitializationAPI(
   const createUserKeysRequest = async (): Promise<void> => {
     try {
       const pass = await promptCertPassword(user.value, true);
-      await api.post<CertRequest>(`bankconnections/${user.value.id}/certificates`, {
-        dn: user.value.dn,
-        usePassword: user.value.usePassword,
-        password: pass,
-      } as CertRequest);
+
+      if (userCertificatesForImport.value.x002.length >0 && userCertificatesForImport.value.e002.length && userCertificatesForImport.value.a005.length ) {
+        await api.post<CertRequest>(`bankconnections/${user.value.id}/certificates/import`, {
+          dn: user.value.dn,
+          usePassword: user.value.usePassword,
+          password: pass,
+          encryptionE002Xml: userCertificatesForImport.value.e002,
+          authenticationX002Xml: userCertificatesForImport.value.x002,
+          signatureA005Xml: userCertificatesForImport.value.a005,
+        } as CertImportRequest);
+      } else {
+        await api.post<CertRequest>(`bankconnections/${user.value.id}/certificates`, {
+          dn: user.value.dn,
+          usePassword: user.value.usePassword,
+          password: pass,
+        } as CertRequest);
+      }
       pwdApiOkHandler(user.value,
         `Certificates created successfully for user name: ${user.value.name} dn: ${user.value.dn}`
       );
@@ -93,7 +106,7 @@ export default function useBankConnectionInitializationAPI(
   const getUserLetters = async (): Promise<UserLettersResponse | undefined> => {
     try {
       const pass = await promptCertPassword(user.value, false);
-      const response = await api.post<UserLettersResponse>(`bankconnections/${user.value.id}/certificates/letters`, { 
+      const response = await api.post<UserLettersResponse>(`bankconnections/${user.value.id}/certificates/letters`, {
         password: pass
       });
       pwdApiOkHandler(user.value,

@@ -17,6 +17,11 @@ enum class EbicsUserStatusEnum {
                     CREATED, NEW -> NEW
                     else -> error("$action action cant be executed at user state: $this")
                 }
+            EbicsUserAction.IMPORT_KEYS ->
+                when (this) {
+                    CREATED, NEW -> INITIALIZED
+                    else -> error("$action action cant be executed at user state: $this")
+                }
             EbicsUserAction.INI ->
                 when (this) {
                     NEW, LOCKED -> PARTLY_INITIALIZED_INI
@@ -51,6 +56,8 @@ enum class EbicsUserStatusEnum {
         when (action) {
             EbicsUserAction.CREATE_KEYS ->
                 require(this == CREATED || this == NEW) { "$action action cant be executed at user state: $this" }
+            EbicsUserAction.IMPORT_KEYS ->
+                require(this == CREATED || this == NEW) { "$action action cant be executed at user state: $this" }
             EbicsUserAction.CREATE_LETTERS ->
                 require(this != CREATED) { "$action action cant be executed at user state: $this" }
             EbicsUserAction.INI ->
@@ -58,6 +65,8 @@ enum class EbicsUserStatusEnum {
             EbicsUserAction.HIA ->
                 require(this == NEW || this == LOCKED || this == PARTLY_INITIALIZED_INI) { "$action action cant be executed at user state: $this" }
             EbicsUserAction.HPB ->
+                require(this == INITIALIZED || this == READY) { "$action action cant be executed at user state: $this" }
+            EbicsUserAction.RESET ->
                 require(this == INITIALIZED || this == READY) { "$action action cant be executed at user state: $this" }
             EbicsUserAction.SPR ->
                 require(this == READY) { "$action action cant be executed at user state: $this" }

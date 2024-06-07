@@ -62,6 +62,21 @@
                 v-model="bankConnection.usePassword"
                 label="Protect your private keys with password (2FA)"
               />
+              <q-input
+                filled
+                v-model="userCertificatesForImport.x002"
+                label="x002 rsa parameters xml"
+              />
+              <q-input
+                filled
+                v-model="userCertificatesForImport.e002"
+                label="e002 rsa parameters xml"
+              />
+              <q-input
+                filled
+                v-model="userCertificatesForImport.a005"
+                label="a005 rsa parameters xml"
+              />
             </div>
             <q-stepper-navigation>
               <q-btn
@@ -335,6 +350,10 @@ import useBankConnectionInitializationAPI from 'components/bankconnection-init';
 import usePasswordAPI from 'components/password-api';
 import useDialogs from 'components/dialogs';
 import { copyToClipboard } from 'quasar';
+import {
+  BankConnection,
+  UserCertificatesForImport
+} from 'components/models/ebics-bank-connection';
 
 export default defineComponent({
   name: 'UserInitalizationWizard',
@@ -349,6 +368,12 @@ export default defineComponent({
     const { confirmDialog } = useDialogs();
     const { promptCertPassword, resetCertPassword } = usePasswordAPI();
 
+    const userCertificatesForImport = ref<UserCertificatesForImport>({
+      e002: '',
+      a005: '',
+      x002: '',
+    })
+
     const {
       actualWizardStep,
       isStepDone,
@@ -356,7 +381,8 @@ export default defineComponent({
       ebicsAdminTypeRequest,
       resetUserStatusRequest,
       getUserLetters,
-    } = useBankConnectionInitializationAPI(bankConnection);
+    } = useBankConnectionInitializationAPI(bankConnection,userCertificatesForImport);
+
 
     const downloadBankKeys = async (): Promise<void> => {
       try {
@@ -430,6 +456,7 @@ export default defineComponent({
     return {
       bankConnection,
       loadBankConnectionWithProperties,
+      userCertificatesForImport,
       actualWizardStep,
       isStepDone,
       createUserKeysRequest,

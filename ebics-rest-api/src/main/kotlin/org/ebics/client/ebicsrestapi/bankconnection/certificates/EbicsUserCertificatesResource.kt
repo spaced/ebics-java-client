@@ -2,6 +2,7 @@ package org.ebics.client.ebicsrestapi.bankconnection.certificates
 
 import org.ebics.client.api.bankconnection.cert.CertRequest
 import org.ebics.client.api.bankconnection.cert.UserCertificateService
+import org.ebics.client.api.bankconnection.cert.CertImportRequest
 import org.ebics.client.ebicsrestapi.bankconnection.UserPass
 import org.springframework.web.bind.annotation.*
 
@@ -13,6 +14,9 @@ class EbicsUserCertificatesResource (
 {
     @PostMapping("")
     fun createUserCertificates(@PathVariable userId: Long, @RequestBody cert: CertRequest):Long = certificateService.createOrUpdateUserCertificates(userId, cert)
+
+    @PostMapping("import")
+    fun importUserCertificates(@PathVariable userId: Long, @RequestBody certImportRequest: CertImportRequest):Long = certificateService.importOrUpdateUserCertificates(userId, certImportRequest)
 
     @PostMapping("letters")
     fun getUserLetters(@PathVariable userId: Long, @RequestBody userPass: UserPass) = certificateService.getUserLetters(userId, userPass.password)

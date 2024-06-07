@@ -10,6 +10,12 @@ export interface CertRequest extends UserPassword {
   password: string;
 }
 
+export interface CertImportRequest extends CertRequest {
+  authenticationX002Xml: string,
+  signatureA005Xml: string,
+  encryptionE002Xml: string
+}
+
 export interface UploadRequest {
   password: string;
   params: Map<string, string>;

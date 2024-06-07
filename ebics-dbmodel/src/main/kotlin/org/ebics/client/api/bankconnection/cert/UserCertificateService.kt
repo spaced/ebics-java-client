@@ -32,6 +32,25 @@ class UserCertificateService(val bankConnectionRepository: BankConnectionReposit
         }
     }
 
+    fun importOrUpdateUserCertificates(userId: Long, certImportRequest: CertImportRequest): Long {
+        try {
+            val user = bankConnectionRepository.getById(userId, "bankconnection")
+            user.checkWriteAccess()
+            user.checkAction(EbicsUserAction.IMPORT_KEYS)
+            val userCertMgr = UserCertificateManager.import(certImportRequest.dn, certImportRequest.signatureA005Xml, certImportRequest.authenticationX002Xml,certImportRequest.encryptionE002Xml)
+            val userKeyStore = UserKeyStore.fromUserCertMgr(user, userCertMgr, certImportRequest.password)
+            userKeyStoreService.save(userKeyStore)
+            user.dn = certImportRequest.dn
+            user.keyStore = userKeyStore
+            user.usePassword = certImportRequest.usePassword
+            user.updateStatus(EbicsUserAction.IMPORT_KEYS)
+            bankConnectionRepository.saveAndFlush(user)
+            return userKeyStore.id!!
+        } catch (ex: IllegalArgumentException) {
+            throw FunctionException("Error import certificate for user $userId", ex)
+        }
+    }
+
     private fun createLetters(user: EbicsUser, userCert: UserCertificateManager): CertificateLetters {
         with(DefaultLetterManager(Locale.getDefault())) {
             val signature = createA005Letter(user, userCert)

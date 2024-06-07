@@ -15,6 +15,12 @@ export interface BankConnectionProperty {
   value: string;
 }
 
+export interface UserCertificatesForImport {
+  e002: string
+  x002: string
+  a005: string
+}
+
 export interface BankConnection extends ConnectionStatus {
     id: number;
     ebicsVersion: EbicsVersion;

@@ -70,6 +70,35 @@ class UserCertificateManager(
             }
         }
 
+        /**
+         * Imports the certificates for the user
+         *
+         * @throws GeneralSecurityException
+         * @throws IOException
+         */
+        @Throws(GeneralSecurityException::class, IOException::class)
+        fun import(userDn: String, a005Xml: String, x002Xml:String, e002Xml:String): UserCertificateManager {
+            try {
+                val calendar: Calendar = Calendar.getInstance()
+                calendar.add(Calendar.DAY_OF_YEAR, X509Constants.DEFAULT_DURATION)
+                val endDate = Date(calendar.timeInMillis)
+                val a005pair = importCertificate(KeyType.A005, userDn, endDate, a005Xml)
+                val x002pair = importCertificate(KeyType.X002, userDn, endDate, x002Xml)
+                val e002pair = importCertificate(KeyType.E002, userDn, endDate, e002Xml)
+                return UserCertificateManager(
+                    a005pair.certificate,
+                    x002pair.certificate,
+                    e002pair.certificate,
+                    a005pair.privateKey,
+                    x002pair.privateKey,
+                    e002pair.privateKey,
+                )
+            } catch (ex:Exception) {
+                throw IllegalArgumentException("Cant create certificate for dn='$userDn' error: ${ex.message}", ex)
+            }
+        }
+
+
         @Throws(GeneralSecurityException::class, IOException::class)
         private fun createCertificate(
             keyType: KeyType,
@@ -77,6 +106,27 @@ class UserCertificateManager(
             end: Date
         ): CertKeyPair {
             val keypair: KeyPair = KeyUtil.makeKeyPair(X509Constants.EBICS_KEY_SIZE)
+            return createCertificate(keyType, userDn, end, keypair)
+        }
+
+        @Throws(GeneralSecurityException::class, IOException::class)
+        private fun importCertificate(
+            keyType: KeyType,
+            userDn: String,
+            end: Date,
+            xml: String
+        ): CertKeyPair {
+            val keypair: KeyPair = KeyUtil.buildKeyPairFromXml(xml)
+            return createCertificate(keyType, userDn, end, keypair)
+        }
+
+        @Throws(GeneralSecurityException::class, IOException::class)
+        private fun createCertificate(
+            keyType: KeyType,
+            userDn: String,
+            end: Date,
+            keypair: KeyPair
+        ): CertKeyPair {
             val cert = when (keyType) {
                 KeyType.A005 -> X509Generator.generateA005Certificate(keypair, userDn, Date(), end)
                 KeyType.X002 -> X509Generator.generateX002Certificate(keypair, userDn, Date(), end)
