@@ -42,7 +42,7 @@ class EbicsBankConnectionsResourceTest(@Autowired private val context: WebApplic
 
     @Test
     fun bankConnectionsGet() {
-        mockMvc.perform(get("/bankconnections/").param("permission", "READ"))
+        mockMvc.perform(get("/bankconnections").param("permission", "READ"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andDo{ MockMvcResultHandlers.print() }
@@ -60,7 +60,7 @@ class EbicsBankConnectionsResourceTest(@Autowired private val context: WebApplic
 
     @Test
     fun bankConnectionGet() {
-        mockMvc.perform(get("/bankconnections/1/").param("permission", "READ"))
+        mockMvc.perform(get("/bankconnections/1").param("permission", "READ"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andDo{ MockMvcResultHandlers.print() }

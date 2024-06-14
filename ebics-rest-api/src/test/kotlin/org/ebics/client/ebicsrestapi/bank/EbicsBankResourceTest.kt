@@ -42,7 +42,7 @@ class EbicsBankResourceTest(@Autowired private val context: WebApplicationContex
 
     @Test
     fun listBanks() {
-        mockMvc.perform(get("/banks/"))
+        mockMvc.perform(get("/banks"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andDo{ MockMvcResultHandlers.print() }
@@ -59,7 +59,7 @@ class EbicsBankResourceTest(@Autowired private val context: WebApplicationContex
 
     @Test
     fun getBankById() {
-        mockMvc.perform(get("/banks/1/"))
+        mockMvc.perform(get("/banks/1"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andDo{ MockMvcResultHandlers.print() }

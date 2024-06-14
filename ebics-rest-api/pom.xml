@@ -13,8 +13,8 @@
 	<name>EBICS REST api</name>
 	<description>EBICS client exposed over REST API</description>
 	<properties>
-		<spring.restdocs.version>2.0.5.RELEASE</spring.restdocs.version>
-		<asciidoctor-maven-plugin-version>2.2.2</asciidoctor-maven-plugin-version>
+		<spring.restdocs.version>3.0.1</spring.restdocs.version>
+		<asciidoctor-maven-plugin-version>2.2.6</asciidoctor-maven-plugin-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
